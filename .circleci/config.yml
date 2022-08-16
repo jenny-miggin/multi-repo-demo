@@ -1,0 +1,14 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run: echo "hello from my-multi-repo"
+
+workflows:
+  run-jobs:
+    jobs:
+      - build
