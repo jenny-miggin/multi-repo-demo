@@ -45,11 +45,11 @@ workflows:
       not: << pipeline.parameters.service-name >>
     jobs:
       - build
-      # - trigger-service-a:
-      #     requires:
-      #       - build
-      #     context:
-      #       - cci
+      - trigger-service-a:
+          requires:
+            - build
+          context:
+            - cci
 
   status-update:
     when: << pipeline.parameters.service-name >>
