@@ -36,11 +36,13 @@ jobs:
     resource_class: small
     steps:
       - run:
-          name: Receive status from << parameters.service-name >>
+          name: Receive status from << pipeline.parameters.service-name >>
           command: echo "the << pipeline.parameters.service-name >> build status is << pipeline.parameters.status >> "
 
 workflows:
   run-jobs:
+    when:
+      not: << pipeline.parameters.service-name >>
     jobs:
       - build
       - trigger-service-a:
