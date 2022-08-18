@@ -1,5 +1,13 @@
 version: 2.1
 
+parameters:
+  service-name:
+    type: string
+    default: ""
+  status:
+    type: string
+    default: ""
+
 jobs:
   build:
     docker:
@@ -8,26 +16,40 @@ jobs:
       - checkout
       - run: echo "hello from my-multi-repo"
 
-  trigger-new-pipeline:
-      docker: 
-        - image: cimg/base:2021.11
-      resource_class: small
-      steps:
-        - run:
-            name: Ping another pipeline
-            command: |
-              curl --request POST \
-                --url https://circleci.com/api/v2/project/gh/jenny-miggin/service-a/pipeline \
-                --header "Circle-Token: $CIRCLE_API_TOKEN" \
-                --header "content-type: application/json" \
-                --data '{"branch":"main"}'
+  trigger-service-a:
+    docker: 
+      - image: cimg/base:2021.11
+    resource_class: small
+    steps:
+      - run:
+          name: Ping another pipeline
+          command: |
+            curl --request POST \
+              --url https://circleci.com/api/v2/project/gh/jenny-miggin/service-a/pipeline \
+              --header "Circle-Token: $CIRCLE_API_TOKEN" \
+              --header "content-type: application/json" \
+              --data '{"branch":"main"}'
+
+  service-status-update:
+    docker: 
+      - image: cimg/base:2021.11
+    resource_class: small
+    steps:
+      - run:
+          name: Receive status from << parameters.service-name >>
+          command: echo "the << pipeline.parameters.service-name >> build status is << pipeline.parameters.status >> "
 
 workflows:
   run-jobs:
     jobs:
       - build
-      - trigger-new-pipeline:
+      - trigger-service-a:
           requires:
             - build
           context:
             - cci
+
+  status-update:
+    when: << pipeline.parameters.service-name >>
+    jobs:
+      - service-status-update
